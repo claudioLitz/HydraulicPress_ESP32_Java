@@ -1,46 +1,72 @@
-# Guia Definitivo: Rodando Wokwi com PlatformIO no VS Code
+# 🚀 Guia Definitivo
 
-Este guia apresenta o passo a passo completo para migrar um projeto de ESP32 do site Wokwi para o ambiente local utilizando o **Visual Studio Code (VS Code)** e a extensão **PlatformIO**. Rodar localmente elimina o problema de filas de espera no simulador online e centraliza o desenvolvimento.
+# Rodando Wokwi com PlatformIO no VS Code
 
----
+Este guia apresenta o passo a passo completo para migrar um projeto
+**ESP32** do site Wokwi para um ambiente local utilizando:
 
-## 1. Sobre a Licença do Wokwi (É Gratuito!)
+-   **Visual Studio Code (VS Code)**
+-   **PlatformIO**
+-   **Wokwi Simulator (extensão VS Code)**
 
-Uma dúvida comum é sobre a licença da extensão do Wokwi expirar após alguns dias. **Você não precisa pagar nada.** A extensão é 100% gratuita para uso pessoal e projetos de código aberto. 
+Rodar localmente elimina filas de espera do simulador online e deixa seu
+desenvolvimento muito mais profissional.
 
-Para renovar a licença quando ela expirar:
-1. No VS Code, pressione a tecla `F1`.
-2. Digite e selecione: `Wokwi: Request a New License`.
-3. O navegador será aberto. Estando logado na sua conta gratuita do Wokwi, clique em **"GET YOUR LICENSE"**. O VS Code será ativado por mais um ciclo gratuitamente.
+------------------------------------------------------------------------
 
----
+# 📌 1. Licença do Wokwi --- Precisa Pagar?
 
-## 2. Pré-requisitos
+Não.
 
-Certifique-se de ter os seguintes itens instalados no seu computador:
-* **Visual Studio Code (VS Code)**
-* Extensão **PlatformIO IDE** (instalada via VS Code)
-* Extensão **Wokwi Simulator** (instalada via VS Code)
+A extensão **Wokwi para VS Code** é gratuita para uso pessoal e projetos
+open source.
 
----
+O sistema de "licença" é apenas uma validação temporária com os
+servidores deles. Quando expirar, basta renovar.
 
-## 3. Passo a Passo da Migração
+## 🔄 Como renovar a licença
 
-### Passo 1: Criar o Projeto no PlatformIO
-1. Abra o VS Code e clique no ícone do **PlatformIO** (uma cabeça de alienígena) na barra lateral.
-2. Na aba **PIO Home**, clique em **New Project**.
-3. Preencha as configurações:
-   * **Name**: Nome do seu projeto (ex: `ProjetoESP32`).
-   * **Board**: Selecione a sua placa (ex: `Espressif ESP32 Dev Module`).
-   * **Framework**: Selecione `Arduino`.
-4. Clique em **Finish** e aguarde a criação da estrutura de pastas.
+1.  Pressione `F1` no VS Code\
+2.  Digite: `Wokwi: Request a New License`\
+3.  O navegador abrirá automaticamente\
+4.  Faça login na sua conta gratuita\
+5.  Clique em **GET YOUR LICENSE**
 
-### Passo 2: Configurar as Bibliotecas (Dependencies)
-No PlatformIO, o gerenciamento de bibliotecas é feito de forma automática pelo arquivo de configuração. 
-1. Na raiz do seu projeto recém-criado, abra o arquivo `platformio.ini`.
-2. Adicione as bibliotecas necessárias usando o comando `lib_deps`. No nosso caso, o arquivo deve ficar parecido com isto:
+------------------------------------------------------------------------
 
-```ini
+# 🧩 2. Pré-requisitos
+
+Antes de começar, verifique se você possui:
+
+-   Visual Studio Code instalado\
+-   Extensão **PlatformIO IDE**\
+-   Extensão **Wokwi Simulator**
+
+------------------------------------------------------------------------
+
+# 🏗 3. Migração do Projeto (Passo a Passo)
+
+## 🛠 Passo 1 --- Criar o Projeto no PlatformIO
+
+1.  Abra o VS Code\
+2.  Clique no ícone do **PlatformIO**\
+3.  Vá em **PIO Home → New Project**
+
+Preencha:
+
+-   **Name**: Projeto_ESP32_Wokwi\
+-   **Board**: Espressif ESP32 Dev Module\
+-   **Framework**: Arduino
+
+Clique em **Finish** e aguarde.
+
+------------------------------------------------------------------------
+
+## 📚 Passo 2 --- Configurar Bibliotecas (`platformio.ini`)
+
+Edite o arquivo `platformio.ini`:
+
+``` ini
 [env:esp32dev]
 platform = espressif32
 board = esp32dev
@@ -51,3 +77,85 @@ lib_deps =
     marcoschwartz/LiquidCrystal_I2C
     bblanchon/ArduinoJson
     knolleary/PubSubClient
+```
+
+O PlatformIO instalará automaticamente as bibliotecas na primeira
+compilação.
+
+------------------------------------------------------------------------
+
+## 💻 Passo 3 --- Trazer o Código Fonte
+
+1.  Copie o `sketch.ino` do Wokwi\
+2.  Cole em `src/main.cpp`\
+3.  Certifique-se que a primeira linha seja:
+
+``` cpp
+#include <Arduino.h>
+```
+
+------------------------------------------------------------------------
+
+## 🧪 Passo 4 --- Compilar (Build)
+
+Clique no botão ✓ na barra inferior.
+
+Aguarde a mensagem:
+
+    SUCCESS
+
+Arquivos gerados em:
+
+    .pio/build/
+
+------------------------------------------------------------------------
+
+## 🔌 Passo 5 --- Migrar o Diagrama
+
+1.  Crie `diagram.json` na raiz\
+2.  Copie o conteúdo do `diagram.json` do Wokwi\
+3.  Cole no arquivo criado
+
+------------------------------------------------------------------------
+
+## 🌉 Passo 6 --- Configurar `wokwi.toml`
+
+Crie `wokwi.toml` na raiz e adicione:
+
+``` toml
+[wokwi]
+version = 1
+firmware = ".pio/build/esp32dev/firmware.bin"
+elf = ".pio/build/esp32dev/firmware.elf"
+```
+
+Se sua placa for diferente, ajuste o nome da pasta dentro de
+`.pio/build/`.
+
+------------------------------------------------------------------------
+
+## ▶️ Passo 7 --- Iniciar a Simulação
+
+1.  Pressione `F1`\
+2.  Execute `Wokwi: Start Simulator`
+
+------------------------------------------------------------------------
+
+# 🧠 Estrutura Final do Projeto
+
+    Projeto_ESP32_Wokwi/
+    │
+    ├── src/
+    │   └── main.cpp
+    │
+    ├── diagram.json
+    ├── wokwi.toml
+    ├── platformio.ini
+    └── .pio/
+
+------------------------------------------------------------------------
+
+# 🏁 Conclusão
+
+Agora você possui um ambiente local profissional para desenvolver e
+simular projetos ESP32 sem depender de filas do simulador online.
