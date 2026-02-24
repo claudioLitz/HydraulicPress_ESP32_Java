@@ -155,7 +155,4 @@ Se sua placa for diferente, ajuste o nome da pasta dentro de
 
 ------------------------------------------------------------------------
 
-# 🏁 Conclusão
 
-Agora você possui um ambiente local profissional para desenvolver e
-simular projetos ESP32 sem depender de filas do simulador online.
