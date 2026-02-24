@@ -7,6 +7,8 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+//Executar java mvn compile exec:java -Dexec.mainClass="br.com.senai.automacao.App"
+
 public class App {
     public static void main(String[] args) {
         //defining broker address, topic (way that file will be) and clientid (Just the name of my device)
