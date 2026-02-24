@@ -24,8 +24,8 @@ public class App {
             options.setCleanSession(true);
 
             // Add user and password
-            options.setUserName("claudio_lit");
-            options.setPassword("senhaForte3".toCharArray());
+            options.setUserName("claudio_litz");
+            options.setPassword("senhaForte123".toCharArray());
 
             // 2. Connect
             System.out.println("Conectando ao broker: " + broker);
