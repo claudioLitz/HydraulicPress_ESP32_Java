@@ -32,41 +32,37 @@ const int mqtt_port = 8883;
 const char* mqtt_user = "claudio_litz";
 const char* mqtt_pass = "senhaForte123";
 const char* mqtt_topic = "senai/claudio/motor/dados";
+const char* mqtt_topic_cmd = "senai/claudio/motor/comandos"; // Topic for callback
 
-// Cria o objeto 'dht' para controlar o sensor, informando em qual pino (DHTPIN) e qual o modelo (DHTTYPE)
+// Cria o objeto 'dht' para controlar o sensor
 DHT dht(DHTPIN, DHTTYPE);
 
-// É o gerente do túnel TCP. Ele NÃO faz a matemática da criptografia sozinho
+// Gerente do túnel TCP
 WiFiClientSecure espClient;
 
-// Apenas traduz nossos comandos (ex: "sala", "25") para o protocolo binário MQTT.
-// Passamos o 'espClient' para ele (Injeção de Dependência) para que ele saiba
-// que deve usar o túnel criptografado para enviar esses dados à internet.
+// Tradutor MQTT
 PubSubClient client(espClient);
 LiquidCrystal_I2C lcd(0x27, 16 , 2);
 
+String comandoAtual = "INICIANDO"; // Global variable to callback
 
 
 // --- Fuction callback (receive data from java) ---
 void callback(char* topic, byte* payload, unsigned int length){ 
   String message = ""; 
-  
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
   }
 
   Serial.println("Comando recebido: " + message);
-
-  lcd.clear(); 
-  lcd.setCursor(0,0); 
-  lcd.print("STATUS: "); 
-  lcd.setCursor(0,1); 
-  lcd.print(message); 
+  
+  // Salva o comando recebido para o loop() usar no LCD
+  comandoAtual = message; 
 
   // ATIVAÇÃO DOS LEDS
   digitalWrite(Gled, message == "VERDE" ? HIGH:LOW); 
   digitalWrite(Yled, message == "AMARELO" ? HIGH:LOW); 
-  digitalWrite(Rled, message == "VERMELHO" ? HIGH:LOW); 
+  digitalWrite(Rled, message == "PROBLEMA" ? HIGH:LOW); 
 }
 
 
@@ -82,8 +78,7 @@ void setup_wifi() {
 
   // Conecta a rede local
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password); // Escolhe a rede e usa a senha
-
+  WiFi.begin(ssid, password); 
 
   // Espera dar o retorno do sinal conectado
   while (WiFi.status() != WL_CONNECTED) {
@@ -99,20 +94,20 @@ void setup_wifi() {
 }
 
 
-
 void connect() {
   // Loop até conectar a rede MQTT 
   while (!client.connected()) {
     Serial.print("Tentando conexão MQTT...");
 
     lcd.setCursor(0,0);
-    lcd.print("Tentando conexao ");
+    lcd.print("Tentando conexao");
     lcd.setCursor(0,1);
-    lcd.print("MQTT... ");
-
+    lcd.print("MQTT...         "); // Espaços para limpar sujeira
 
     if (client.connect("ESP32_ClienteID_Claudio", mqtt_user, mqtt_pass)) {
       Serial.println("conectado");
+      client.subscribe(mqtt_topic_cmd); // Connecting to callback topic
+    
     } else {
       Serial.print("falhou, rc=");
       Serial.print(client.state());
@@ -121,7 +116,6 @@ void connect() {
     }
   }
 }
-
 
 
 void setup() {
@@ -137,13 +131,11 @@ void setup() {
   pinMode(Yled, OUTPUT);
   pinMode(SENDled, OUTPUT);
   
-
   // Fuction to Connect with local WiFi
   setup_wifi(); 
 
-  // Diz ao cliente Wi-Fi para criptografar os dados, mas pular a exigência do certificado digital do servidor
+  // Diz ao cliente Wi-Fi para criptografar os dados
   espClient.setInsecure();
-  // Aponta para qual endereço (mqtt_server) e porta (mqtt_port) o cliente MQTT deve tentar se conectar
   client.setServer(mqtt_server, mqtt_port);
 
   // Ativa a função em segundo plano para mostrar tudo o que retornar
@@ -152,45 +144,25 @@ void setup() {
   // Test lcd scream
   lcd.setCursor(0,0);
   lcd.print("-Sistema ligado-");
-
   lcd.setCursor(0,1);
-  lcd.print("Teste Hardware");
+  lcd.print("Teste Hardware  ");
   
-
   int NRled;
   int NYled;
   int NGled;
+  
   // Loop for test LEDs
   for (int i = 0; i < 17;i++){
     NGled = random(100);
-
-    if ((NGled % 2) == 0){
-      digitalWrite(Gled, HIGH);
-    } else {
-      digitalWrite(Gled, LOW);
-    }
-
-    
+    digitalWrite(Gled, (NGled % 2) == 0 ? HIGH : LOW);
 
     NYled = random(100);
-    if ((NYled % 2) == 0){
-      digitalWrite(Yled, HIGH);
-    } else {
-      digitalWrite(Yled, LOW);
-    }
+    digitalWrite(Yled, (NYled % 2) == 0 ? HIGH : LOW);
     
     NRled = random(100);
-    if ((NRled % 2) == 0){
-      digitalWrite(Rled, HIGH);
-    } else {
-      digitalWrite(Rled, LOW);
-    }
+    digitalWrite(Rled, (NRled % 2) == 0 ? HIGH : LOW);
 
     delay(120);
-
-    NGled = 0;
-    NYled = 0;
-    NRled = 0;
   }
 
   digitalWrite(Rled, LOW);
@@ -206,10 +178,7 @@ void loop() {
   if (!client.connected()) {
     connect();
   }
-  client.loop(); // Method to maintain connected in broken
-
-  // Clear lcd scream
-  lcd.clear();
+  client.loop(); // Method to maintain connected in broker
 
   // Turn off green led that responsible to send message
   digitalWrite(SENDled, LOW);
@@ -234,12 +203,26 @@ void loop() {
   Serial.println("Publicado: " + payload);
   digitalWrite(SENDled,HIGH);
 
-
-  // ---Show data on lcd---
-  lcd.setCursor(0,0);
-  lcd.print("T:" + String(temp) + "  P:" + String(press));
-  lcd.setCursor(0,1);
-  lcd.print("C:" + String(corr));
+  // ==========================================
+  // --- EXIBIÇÃO DE DADOS NO LCD ---
+  // ==========================================
+  if (comandoAtual == "PROBLEMA") {
+    // Modo Alerta: Sobrepõe tudo na tela
+    lcd.setCursor(0,0);
+    lcd.print("!!! ALERTA !!!  "); 
+    
+    lcd.setCursor(0,1);
+    lcd.print("STATUS: PROBLEMA"); 
+  } else {
+    // Modo Normal: Exibe os 3 sensores e esconde o status
+    // Linha 1: "T:25.3C P:100.0 " (Exatos 16 caracteres com o espaço no final)
+    lcd.setCursor(0,0);
+    lcd.print("T:" + String(temp, 1) + "C P:" + String(press, 1) + " ");
+    
+    // Linha 2: "Corr:45.5A      " (Preenche com espaços para apagar a palavra "PROBLEMA")
+    lcd.setCursor(0,1);
+    lcd.print("Corr:" + String(corr, 1) + "A      ");
+  }
 
   delay(3000);
 }
