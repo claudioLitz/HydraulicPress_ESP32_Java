@@ -1,4 +1,4 @@
-# [cite_start]Sistema de Monitoramento e Controle de Prensa Hidráulica [cite: 1] 🏭💧
+# Sistema de Monitoramento e Controle de Prensa Hidráulica 🏭💧
 
 ![Status](https://img.shields.io/badge/Status-Concluído-success)
 ![Hardware](https://img.shields.io/badge/Hardware-ESP32-blue)
@@ -6,45 +6,56 @@
 ![Protocolo](https://img.shields.io/badge/Protocolo-MQTT-yellow)
 
 ## 📌 Sobre o Projeto
-[cite_start]O presente projeto consiste no desenvolvimento de um cibersistema para o monitoramento de uma prensa hidráulica industrial[cite: 3]. [cite_start]O objetivo é integrar um microcontrolador ESP32 a um software backend desenvolvido em Java (rodando em um servidor externo) para garantir o monitoramento adequado da segurança operacional[cite: 4]. [cite_start]O sistema coleta dados vitais e emprega uma lógica remota de tomada de decisão via protocolo MQTT para acionamento de alertas em tempo real[cite: 5].
+Este projeto apresenta o desenvolvimento de um cibersistema para o monitoramento de uma prensa hidráulica industrial. O objetivo é integrar um microcontrolador ESP32 a um software backend desenvolvido em Java, garantindo o monitoramento adequado para a segurança operacional da máquina. 
+
+O sistema coleta dados de temperatura, pressão e corrente da prensa hidráulica de forma simulada e utiliza uma lógica de tomada de decisão remota via protocolo MQTT, acionando alertas visuais (LEDs) e mensagens no display em tempo real.
 
 ## 🏗️ Arquitetura de Dados e Tecnologias
-[cite_start]Para uma integração adequada, o sistema engloba Programação Orientada a Objetos no backend e Programação Estruturada no firmware[cite: 6].
-* [cite_start]**Microcontrolador**: ESP32[cite: 4].
-* [cite_start]**Backend**: Java com gerenciamento de dependências via Maven[cite: 82].
-* [cite_start]**Protocolo**: MQTT (Message Queuing Telemetry Transport)[cite: 7].
-* [cite_start]**Broker MQTT**: HiveMQ Cloud (`ab7bca8a88fb429ea9c6e193eb502776.s1.eu.hivemq.cloud`), Porta `8883`[cite: 7].
-* [cite_start]**Tópico de Comunicação**: `senai/claudio/motor/dados`[cite: 7].
-* [cite_start]**Formato do Payload**: Os dados de leitura chegam ao backend organizados em formato JSON[cite: 104, 105]. [cite_start]Exemplo: `{"Temperatura":24.00, "Pressao":8.00, "Corrente":32.00}`[cite: 7].
+O projeto unifica dois ecossistemas distintos no mesmo repositório (Monorepo), integrando Programação Estruturada (C++) e Programação Orientada a Objetos (Java).
+
+* **Microcontrolador:** ESP32 (Firmware em C++)
+* **Backend:** Java (Gerenciamento de dependências via Maven)
+* **Protocolo de Comunicação:** MQTT (Message Queuing Telemetry Transport)
+* **Broker MQTT:** HiveMQ Cloud (ab7bca8a88fb429ea9c6e193eb502776.s1.eu.hivemq.cloud, Porta: 8883)
+* **Tópico MQTT:** senai/claudio/motor/dados
+* **Formato do Payload:** JSON (Exemplo: {"Temperatura":24.00, "Pressao":8.00, "Corrente":32.00})
 
 ## 🛠️ Hardware Utilizado (Ambiente Simulado)
-[cite_start]O circuito foi prototipado para garantir a integridade dos sinais analógicos e digitais[cite: 10]. Foram utilizados:
-* [cite_start]**ESP32**: Microcontrolador base com módulo Wi-Fi[cite: 164].
-* [cite_start]**Sensor DHT22**: Para a leitura da temperatura operacional[cite: 8].
-* [cite_start]**Potenciômetros (2x)**: Para simulação do transdutor de pressão e do sensor de corrente[cite: 8, 9].
-* [cite_start]**Display LCD 16x2 I2C**: Para exibição da telemetria e de mensagens locais[cite: 9].
-* [cite_start]**Sistema de LEDs**: Verde (Operação Segura), Amarelo (Alerta de Faixa), Vermelho (Estado Crítico/Parada) e Verde Secundário (Status de envio de dados)[cite: 10, 11].
+Devido à necessidade de manter a estabilidade para os testes, o hardware foi projetado no simulador Wokwi rodando localmente. Os componentes incluem:
+* **ESP32:** Microcontrolador principal com Wi-Fi.
+* **Sensor DHT22:** Leitura da temperatura.
+* **Potenciômetro 1:** Simulação do transdutor de pressão (0 a 100%).
+* **Potenciômetro 2:** Simulação do sensor de corrente (0 a 100A).
+* **Display LCD 16x2 I2C:** Exibição local das informações de telemetria.
+* **LEDs Indicadores:**
+  * 🟢 Verde (GPIO 4): Operação Segura.
+  * 🟡 Amarelo (GPIO 17): Alerta de Faixa.
+  * 🔴 Vermelho (GPIO 13): Estado Crítico / Parada.
+  * 🟢 Verde 2 (GPIO 12): Indicador de envio de dados MQTT.
 
-## 💻 Estrutura do Repositório (Monorepo)
-[cite_start]O projeto unifica dois ecossistemas em um único repositório GitHub[cite: 122]:
-
-* **`simulador-wokwi/`**: Contém o firmware em C++. [cite_start]Esta área foi estruturada para uso no VS Code usando a extensão do **PlatformIO**, que compila o código e gerencia as bibliotecas, em conjunto com a extensão local do **Wokwi**[cite: 108, 109].
-* [cite_start]**`backend-maven/`**: Contém o software receptor Java, estruturado pelo Maven (`pom.xml`) sob o `groupId` *br.com.senai.automacao* e o `artifactId` *press-mqtt-collector*[cite: 86, 91].
+## 💻 Estrutura do Repositório
+O repositório está dividido em duas pastas principais:
+* `simulador-wokwi/`: Contém o código C++ e a simulação do circuito. Deve ser aberto via VS Code com a extensão PlatformIO.
+* `backend-maven/`: Contém o código Java do receptor MQTT. Estruturado com pom.xml para execução via terminal.
 
 ## 🚀 Como Executar o Projeto
 
-Para executar a solução de forma fluida, siga os passos referentes aos diferentes ambientes de execução.
+### 1. Inicializando o Hardware (ESP32 / Wokwi)
+1. Abra o VS Code.
+2. Vá em **File > Open Folder...** e selecione **apenas a pasta simulador-wokwi** (não abra a raiz do repositório).
+3. Aguarde o PlatformIO instalar as dependências.
+4. Abra o arquivo json do circuito no Wokwi e inicie a simulação. O ESP32 conectará no Wi-Fi virtual e iniciará o envio de dados.
 
-### 1. Inicializando o Hardware (ESP32 via PlatformIO + Wokwi)
-[cite_start]Devido à instabilidade dos servidores online, a simulação foi adaptada para rodar de forma confiável no seu próprio computador[cite: 107].
-1. No VS Code (no ambiente Windows), vá em **File > Open Folder...** e selecione **exclusivamente a pasta `simulador-wokwi`**. [cite_start]Isso é crucial para o PlatformIO identificar corretamente o ambiente[cite: 108].
-2. [cite_start]Aguarde o PlatformIO carregar as dependências[cite: 108].
-3. [cite_start]Abra o arquivo de simulação do circuito pelo Wokwi local[cite: 109].
-4. [cite_start]O ESP32 iniciará a conexão na rede virtual (`Wokwi-GUEST`) e enviará o payload via MQTT[cite: 43, 76].
+### 2. Inicializando o Backend (Java / Maven)
+1. Abra o terminal do seu ambiente Linux (ou WSL, caso use Windows).
+2. Navegue até o diretório do projeto Java (onde está o arquivo pom.xml), executando o comando:
+   `cd backend-maven/demo`
+3. Execute o comando abaixo para compilar e iniciar o sistema:
+   `mvn clean compile exec:java -Dexec.mainClass="br.com.senai.automacao.App"`
+4. O console exibirá a conexão com o broker e passará a registrar as leituras da prensa em tempo real.
 
-### 2. Inicializando o Backend (Java via Maven)
-1. Abra um terminal do ambiente Linux (WSL).
-2. [cite_start]Navegue até o diretório onde encontra-se a base da arquitetura do Maven (o arquivo `pom.xml`)[cite: 89, 90]. Exemplo: `cd caminho/para/backend-maven/demo`.
-3. [cite_start]Execute o seguinte comando do Maven para limpar o ambiente, compilar o código mais recente e executar a classe principal (`App.java`)[cite: 88, 89]:
-   ```bash
-   mvn clean compile exec:java -Dexec.mainClass="br.com.senai.automacao.App"
+## 👨‍💻 Créditos e Autoria
+* **Autor:** Claudio Gabriel Litz
+* **Docente:** Lucas Sousa dos Santos
+* **Instituição:** WEG S.A / Sesi SENAI
+* **Local:** Jaraguá do Sul, SC - 2026
