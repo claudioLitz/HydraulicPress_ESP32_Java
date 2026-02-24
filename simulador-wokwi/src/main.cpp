@@ -224,5 +224,5 @@ void loop() {
     lcd.print("Corr:" + String(corr, 1) + "A      ");
   }
 
-  delay(3000);
+  delay(1000);
 }
